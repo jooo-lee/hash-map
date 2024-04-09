@@ -3,8 +3,8 @@ import LinkedList from 'linked-list-jo';
 class HashMap {
     constructor() {
         this.buckets = []; // Array of linked lists
-        this.capacity = 16;
-        this.loadFactor = this.capacity * 0.75;
+        this.capacity = 16; // Total number of buckets we have
+        this.loadFactor = 0.75; // When to grow buckets
     }
 
     // Takes a key (of type String) and produces a hash code with it
@@ -22,7 +22,7 @@ class HashMap {
     set(key, value) {
         const hashCode = this.hash(key);
         if (hashCode < 0 || hashCode >= this.capacity) {
-            throw new Error('Trying to access index out of bound!');
+            throw new Error('Trying to access index out of bounds!');
         }
         const bucket = this.buckets[hashCode];
         if (!bucket) {
@@ -44,13 +44,20 @@ class HashMap {
             // Key not found
             bucket.append({ [key]: value });
         }
+        // Grow buckets size if needed
+        const nonEmptyBuckets = this.buckets.filter((bucket) => bucket).length;
+        if (nonEmptyBuckets >= this.loadFactor * this.capacity) {
+            const newBuckets = [...this.buckets];
+            this.capacity *= 2;
+            this.buckets = newBuckets;
+        }
     }
 
     // Returns the value that is assigned to key or null if key is not found
     get(key) {
         const hashCode = this.hash(key);
         if (hashCode < 0 || hashCode >= this.capacity) {
-            throw new Error('Trying to access index out of bound!');
+            throw new Error('Trying to access index out of bounds!');
         }
         const bucket = this.buckets[hashCode];
         if (!bucket) return null;
@@ -76,10 +83,9 @@ class HashMap {
         if (value === null) return false;
         const hashCode = this.hash(key);
         if (hashCode < 0 || hashCode >= this.capacity) {
-            throw new Error('Trying to access index out of bound!');
+            throw new Error('Trying to access index out of bounds!');
         }
         const bucket = this.buckets[hashCode];
-
         let tmp = bucket.getHead();
         let index = 0;
         while (tmp) {
@@ -93,7 +99,7 @@ class HashMap {
 
     // Returns the number of stored keys in the hash map
     length() {
-        return this.entries().length;
+        return this.keys().length;
     }
 
     // Removes all entries in the hash map
